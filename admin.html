@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>لوحة التحكم - اسأل</title>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ffffff;--surface:#f3f4f1;--surface2:#e8ebe6;--border:#d4d8d0;--accent:#16a34a;--accent2:#22c55e;--text:#1a1a1a;--text2:#6b7280;--red:#ef4444;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:60px;}
+.header{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.header-icon{width:42px;height:42px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.header-icon svg{width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;}
+.header-title{font-family:'Aref Ruqaa',serif;font-size:1.6rem;font-weight:700;color:var(--accent);}
+.header-sub{font-size:0.75rem;color:var(--text2);}
+
+.lock-screen{padding:60px 24px;text-align:center;}
+.lock-icon{font-size:3rem;margin-bottom:16px;}
+.lock-title{font-size:1.1rem;font-weight:700;margin-bottom:8px;}
+.lock-sub{font-size:0.82rem;color:var(--text2);margin-bottom:20px;line-height:1.6;}
+.lock-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;font-size:1rem;font-family:'Cairo',sans-serif;outline:none;margin-bottom:12px;letter-spacing:0.1em;}
+.lock-input:focus{border-color:var(--accent);}
+.lock-btn{width:100%;padding:14px;border-radius:14px;background:var(--accent);color:white;border:none;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;}
+.lock-error{color:var(--red);font-size:0.8rem;margin-bottom:10px;display:none;}
+.lock-error.show{display:block;}
+
+.panel{display:none;padding:20px;}
+.panel.show{display:block;}
+
+.section{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:16px;}
+.section-title{font-size:0.92rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.section-sub{font-size:0.75rem;color:var(--text2);margin-bottom:14px;line-height:1.5;}
+
+.stat-row{display:flex;gap:10px;margin-bottom:16px;}
+.stat-box{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;}
+.stat-num{font-size:1.5rem;font-weight:700;color:var(--accent);}
+.stat-label{font-size:0.7rem;color:var(--text2);margin-top:2px;}
+
+.version-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-family:'Cairo',sans-serif;font-size:0.9rem;outline:none;margin-bottom:10px;direction:rtl;}
+.version-input:focus{border-color:var(--accent);}
+
+.add-code-row{display:flex;gap:8px;margin-bottom:14px;}
+.add-code-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-family:'Cairo',sans-serif;font-size:0.88rem;outline:none;letter-spacing:0.08em;text-transform:uppercase;}
+.add-code-input:focus{border-color:var(--accent);}
+.add-code-btn{padding:0 18px;border-radius:12px;background:var(--accent);color:white;border:none;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;}
+.gen-btn{width:100%;padding:11px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);color:var(--accent);font-family:'Cairo',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;margin-bottom:14px;}
+
+.code-list{display:flex;flex-direction:column;gap:8px;}
+.code-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 14px;}
+.code-item.used{opacity:0.55;}
+.code-text{font-family:'Cairo',sans-serif;font-weight:700;font-size:0.92rem;letter-spacing:0.08em;}
+.code-status{font-size:0.68rem;padding:3px 8px;border-radius:8px;font-weight:600;}
+.code-status.available{background:rgba(34,197,94,0.12);color:#16a34a;}
+.code-status.used-badge{background:rgba(107,114,128,0.12);color:#6b7280;}
+.code-actions{display:flex;gap:6px;align-items:center;}
+.code-del{width:28px;height:28px;border-radius:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:var(--red);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.9rem;flex-shrink:0;}
+.empty-list{text-align:center;padding:24px;color:var(--text2);font-size:0.82rem;}
+
+.danger-btn{width:100%;padding:12px;border-radius:12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);color:var(--red);font-family:'Cairo',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;}
+
+.note-box{background:rgba(22,163,74,0.06);border:1px solid rgba(22,163,74,0.2);border-radius:14px;padding:14px;font-size:0.78rem;color:#15803d;line-height:1.7;margin-bottom:16px;}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-60px);background:var(--surface2);border:1px solid var(--accent);color:var(--accent);padding:10px 20px;border-radius:20px;font-size:0.82rem;font-weight:600;z-index:999;transition:transform 0.3s ease;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="header">
+  <div class="header-icon">
+    <svg viewBox="0 0 24 24"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>
+  </div>
+  <div>
+    <div class="header-title">لوحة التحكم</div>
+    <div class="header-sub">إدارة أكواد تحميل تطبيق "اسأل"</div>
+  </div>
+</div>
+
+<!-- شاشة القفل -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-icon">🔐</div>
+  <div class="lock-title">دخول لوحة التحكم</div>
+  <div class="lock-sub">هذه الصفحة خاصة بك فقط.<br>أدخل كلمة المرور للمتابعة.</div>
+  <div class="lock-error" id="lockError">كلمة المرور غير صحيحة</div>
+  <input type="password" class="lock-input" id="lockInput" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter')tryUnlock()">
+  <button class="lock-btn" onclick="tryUnlock()">دخول</button>
+</div>
+
+<!-- اللوحة الرئيسية -->
+<div class="panel" id="panel">
+
+  <div class="note-box">
+    ℹ️ هذه اللوحة تتحكم في الأكواد <strong>المخزّنة على هذا المتصفح فقط</strong>. لتحديث الأكواد التي يستخدمها تطبيق "اسأل" المنشور فعلياً، افتح هذه اللوحة من <strong>نفس المتصفح</strong> الذي ستفتح منه التطبيق على هاتفك، أو انسخ قائمة الأكواد الجديدة وأرسلها لي لتحديث الملف.
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">إجمالي الأكواد</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="statAvailable">0</div>
+      <div class="stat-label">متاحة</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="statUsed">0</div>
+      <div class="stat-label">مُستخدمة</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📛 اسم النسخة</div>
+    <div class="section-sub">يظهر هذا الاسم للتعرف على إصدار التطبيق الحالي.</div>
+    <input type="text" class="version-input" id="versionInput" placeholder="مثال: اسأل - الإصدار 1.0">
+    <button class="gen-btn" onclick="saveVersion()">💾 حفظ اسم النسخة</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">➕ إضافة كود جديد</div>
+    <div class="section-sub">أضف كوداً واحداً يدوياً، أو ولّد كوداً عشوائياً بضغطة زر.</div>
+    <div class="add-code-row">
+      <input type="text" class="add-code-input" id="newCodeInput" placeholder="اكتب كود مثل AB12CD34" maxlength="20">
+      <button class="add-code-btn" onclick="addManualCode()">إضافة</button>
+    </div>
+    <button class="gen-btn" onclick="generateCode()">🎲 توليد كود عشوائي جديد</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 كل الأكواد</div>
+    <div class="section-sub">الأكواد المتاحة يمكن استخدامها للتحميل. الأكواد المستخدمة لا يمكن استخدامها مرة أخرى على أي جهاز آخر.</div>
+    <div class="code-list" id="codeList"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ منطقة الخطر</div>
+    <div class="section-sub">إعادة الضبط ستحذف كل الأكواد وسجل الاستخدام من هذا المتصفح.</div>
+    <button class="danger-btn" onclick="resetAll()">إعادة ضبط كل البيانات</button>
+  </div>
+
+</div>
+
+<script>
+var ADMIN_PASSWORD = "1234"; // غيّر كلمة المرور دي لحماية اللوحة
+
+function tryUnlock(){
+  var pass = document.getElementById('lockInput').value;
+  if(pass === ADMIN_PASSWORD){
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('panel').classList.add('show');
+    loadAll();
+  } else {
+    document.getElementById('lockError').classList.add('show');
+  }
+}
+
+function getCodes(){
+  var stored = localStorage.getItem('bnb_valid_codes');
+  if(stored){ try{ return JSON.parse(stored); }catch(e){} }
+  return ["AB12CD34","XY98ZT21","QW45ER67","LK33MN89","PO11AS22"];
+}
+function saveCodes(codes){
+  localStorage.setItem('bnb_valid_codes', JSON.stringify(codes));
+}
+function getUsedCodes(){
+  try{ return JSON.parse(localStorage.getItem('bnb_used_codes')||'[]'); }catch(e){ return []; }
+}
+
+function loadAll(){
+  var version = localStorage.getItem('bnb_version_name') || '';
+  document.getElementById('versionInput').value = version;
+  renderCodes();
+}
+
+function renderCodes(){
+  var codes = getCodes();
+  var used = getUsedCodes();
+  var list = document.getElementById('codeList');
+  list.innerHTML = '';
+
+  if(codes.length === 0){
+    list.innerHTML = '<div class="empty-list">لا توجد أكواد بعد. أضف كوداً من الأعلى.</div>';
+  } else {
+    codes.forEach(function(code){
+      var isUsed = used.indexOf(code) !== -1;
+      var item = document.createElement('div');
+      item.className = 'code-item' + (isUsed ? ' used' : '');
+
+      var codeText = document.createElement('div');
+      codeText.className = 'code-text';
+      codeText.textContent = code;
+
+      var actions = document.createElement('div');
+      actions.className = 'code-actions';
+
+      var badge = document.createElement('span');
+      badge.className = 'code-status ' + (isUsed ? 'used-badge' : 'available');
+      badge.textContent = isUsed ? 'مُستخدم' : 'متاح';
+
+      var del = document.createElement('div');
+      del.className = 'code-del';
+      del.textContent = '✕';
+      del.addEventListener('click', (function(c){ return function(){ deleteCode(c); }; })(code));
+
+      actions.appendChild(badge);
+      actions.appendChild(del);
+      item.appendChild(codeText);
+      item.appendChild(actions);
+      list.appendChild(item);
+    });
+  }
+
+  document.getElementById('statTotal').textContent = codes.length;
+  document.getElementById('statUsed').textContent = used.filter(function(c){return codes.indexOf(c)!==-1;}).length;
+  document.getElementById('statAvailable').textContent = codes.length - used.filter(function(c){return codes.indexOf(c)!==-1;}).length;
+}
+
+function addManualCode(){
+  var input = document.getElementById('newCodeInput');
+  var code = input.value.trim().toUpperCase();
+  if(!code){ showToast('اكتب كود أولاً'); return; }
+  var codes = getCodes();
+  if(codes.indexOf(code) !== -1){ showToast('هذا الكود موجود بالفعل'); return; }
+  codes.push(code);
+  saveCodes(codes);
+  input.value = '';
+  renderCodes();
+  showToast('تمت إضافة الكود');
+}
+
+function generateCode(){
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code = '';
+  for(var i=0; i<8; i++){ code += chars.charAt(Math.floor(Math.random()*chars.length)); }
+  var codes = getCodes();
+  codes.push(code);
+  saveCodes(codes);
+  renderCodes();
+  showToast('تم توليد كود جديد: ' + code);
+}
+
+function deleteCode(code){
+  if(!confirm('حذف الكود ' + code + '؟')) return;
+  var codes = getCodes().filter(function(c){ return c !== code; });
+  saveCodes(codes);
+  renderCodes();
+  showToast('تم حذف الكود');
+}
+
+function saveVersion(){
+  var v = document.getElementById('versionInput').value.trim();
+  localStorage.setItem('bnb_version_name', v);
+  showToast('تم حفظ اسم النسخة');
+}
+
+function resetAll(){
+  if(!confirm('سيتم حذف كل الأكواد وسجل الاستخدام. متأكد؟')) return;
+  localStorage.removeItem('bnb_valid_codes');
+  localStorage.removeItem('bnb_used_codes');
+  localStorage.removeItem('bnb_device_code');
+  renderCodes();
+  showToast('تمت إعادة الضبط');
+}
+
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+</script>
+</body>
+</html>
